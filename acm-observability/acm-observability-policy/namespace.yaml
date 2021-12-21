@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: Advanced Cluster Management Observability Policy
+    openshift.io/display-name: Policy ACM Observability
+  name: policy-acm-observability

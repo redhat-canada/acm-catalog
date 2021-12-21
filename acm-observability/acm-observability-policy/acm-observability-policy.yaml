@@ -1,0 +1,145 @@
+# This policy installs the Advanced Cluster Management Observability functionality
+# on the Hub cluster.
+# Based on https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.4/html/observability/observing-environments-intro#persistent-stores-observability
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-acm-observability-operator
+  namespace: policy-acm-observability
+  annotations:
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: acm-observability-namespace
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: open-cluster-management-observability
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: acm-observability-pull-secret
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: v1
+              kind: Secret
+              type: kubernetes.io/dockerconfigjson
+              metadata:
+                name: multiclusterhub-operator-pull-secret
+                namespace: open-cluster-management-observability
+              data:
+                .dockerconfigjson: |
+                  {{ fromSecret "openshift-config" "pull-secret" ".dockerconfigjson" }}
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: acm-observability-objectbucketclaim
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: objectbucket.io/v1alpha1
+              kind: ObjectBucketClaim
+              metadata:
+                name: acm-object-storage
+                namespace: open-cluster-management-observability
+              spec:
+                additionalConfig:
+                  bucketclass: noobaa-default-bucket-class
+                generateBucketName: acm-object-storage
+                storageClassName: openshift-storage.noobaa.io
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: thanos-object-storage-secret
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: thanos-object-storage
+                namespace: open-cluster-management-observability
+              type: Opaque
+              stringData:
+                thanos.yaml: |
+                  type: s3
+                  config:
+                    bucket: {{ fromConfigMap "open-cluster-management-observability" "acm-object-storage" "BUCKET_NAME" }}
+                    endpoint: {{ fromConfigMap "open-cluster-management-observability" "acm-object-storage" "BUCKET_HOST" }}
+                    insecure: true
+                    access_key: {{ fromSecret "open-cluster-management-observability" "acm-object-storage" "AWS_ACCESS_KEY_ID" | base64dec }}
+                    secret_key: {{ fromSecret "open-cluster-management-observability" "acm-object-storage" "AWS_SECRET_ACCESS_KEY" | base64dec }}
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: acm-observability-instance
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: observability.open-cluster-management.io/v1beta2
+              kind: MultiClusterObservability
+              metadata:
+                name: observability
+                namespace: open-cluster-management-observability
+              spec:
+                observabilityAddonSpec: {}
+                storageConfig:
+                  metricObjectStorage:
+                    name: thanos-object-storage
+                    key: thanos.yaml
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-acm-observability-operator
+placementRef:
+  name: placement-policy-acm-observability-operator
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-acm-observability-operator
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-acm-observability-operator
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - {key: local-cluster, operator: In, values: ["true"]}

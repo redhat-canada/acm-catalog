@@ -1,0 +1,167 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-object-storage
+  namespace: policy-noobaa-s3
+  annotations:
+    policy.open-cluster-management.io/standards: Storage
+    policy.open-cluster-management.io/categories: Object
+    policy.open-cluster-management.io/controls: S3 Compatible
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: object-storage-namespace
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+                apiVersion: v1                    
+                kind: Namespace
+                metadata:
+                  labels:
+                    openshift.io/cluster-monitoring: "true"
+                  name: openshift-storage
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: ocs-operator
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: operators.coreos.com/v1alpha1
+              kind: Subscription
+              metadata:
+                name: ocs-operator
+                namespace: openshift-storage
+              spec:
+                channel: stable-4.8
+                installPlanApproval: Automatic
+                name: ocs-operator
+                source: redhat-operators
+                sourceNamespace: openshift-marketplace
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: operators.coreos.com/v1
+              kind: OperatorGroup
+              metadata:
+                name: openshift-storage
+                namespace: openshift-storage
+              spec:
+                targetNamespaces:
+                  - openshift-storage
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: object-storage-noobaa-deployment
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: noobaa.io/v1alpha1
+              kind: NooBaa
+              metadata:
+                name: noobaa
+                namespace: openshift-storage
+              spec:
+              dbResources:
+                requests:
+                  cpu: '0.1'
+                  memory: 1Gi
+              dbType: postgres
+              coreResources:
+                requests:
+                  cpu: '0.1'
+                  memory: 1Gi
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: object-storage-backing-store
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: noobaa.io/v1alpha1
+              kind: BackingStore
+              metadata:
+                finalizers:
+                - noobaa.io/finalizer
+                labels:
+                  app: noobaa
+                name: noobaa-pv-backing-store
+                namespace: openshift-storage
+              spec:
+                pvPool:
+                  numVolumes: 1
+                  resources:
+                    requests:
+                      storage: 50Gi
+                type: pv-pool
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: object-storage-default-class
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: noobaa.io/v1alpha1
+              kind: BucketClass
+              metadata:
+                name: noobaa-default-bucket-class
+                namespace: openshift-storage
+                labels:
+                  app: noobaa
+                annotations:
+                  apps.open-cluster-management.io/reconcile-option: replace
+              spec:
+                placementPolicy:
+                  tiers:
+                    - backingStores:
+                        - noobaa-pv-backing-store
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-object-storage
+  namespace: policy-noobaa-s3
+placementRef:
+  name: placement-policy-object-storage
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-object-storage
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-object-storage
+  namespace: policy-noobaa-s3
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - {key: object-storage, operator: In, values: ["true"]}

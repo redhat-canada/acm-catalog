@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: Noobaa S3 Policy
+    openshift.io/display-name: Noobaa S3 Policy
+  name: policy-noobaa-s3
