@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: Advanced Cluster Security - SecuredCluster
+    openshift.io/display-name: Policy ACS SecuredCluster
+  name: policy-acs-securedcluster
