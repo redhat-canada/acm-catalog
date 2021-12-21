@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  annotations:
-    openshift.io/description: Advanced Cluster Security - Central
-    openshift.io/display-name: Policy ACS Central
-  name: policy-acs-central

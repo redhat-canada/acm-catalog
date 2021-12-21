@@ -3,23 +3,33 @@
 If you want ACS to have a trusted certificate for it's route, you will need to first run the following manual steps:
 
 1. Login to your cluster with `oc` as a cluster-admin.
-2. Find the name of your router certificate secrets.
+2. Pre-create the `stackrox` namespace.
+```
+# Use "adm" to avoid any quotas/limits associated with new project template.
+oc adm new-project stackrox
+```
+3. Find the name of your router certificate secrets.
 ```
 oc get secret -n openshift-ingress
 ```
-3. Copy the secret to your machine.
+4. Create cert and key pem files locally.
 ```
-oc get secret ingress-certs-2021-12-21 -n openshift-ingress -o yaml > ingress-cert.yaml
+oc get secret <ingress cert name> -n openshift-ingress \
+  -o jsonpath="{.data.tls\.crt}" \
+  | base64 -d \
+  > cert.pem  
+
+oc get secret <ingress cert name> -n openshift-ingress \
+  -o jsonpath="{.data.tls\.key}" \
+  | base64 -d \
+  > key.pem
 ```
-4. Edit the file and change the secret name to `ingress-certs` then remove:
-    * `namespace` 
-    * `creationTimestamp`
-    * `resourceVersion`
-    * `uid`
-5. Create a new namespace to hold a copy of the cert, then create the certificat in that namespace.
+5. Create a default tls secret in the `stackrox` namespace.
 ```
-oc new-project stackrox-secrets
-oc apply -f ingress-cert.yaml -n stackrox-secrets
+oc -n stackrox create secret tls central-default-tls-cert \
+  --cert cert.pem \
+  --key key.pem \
+  --dry-run -o yaml | oc apply -f -
 ```
 
-Now you can use the `acs-central-policy-with-certs` policy to deploy ACS with good certificates.
+Done!  Now, when you create a "Central" instance, it should automatically pick up your certificates.  No more self-signed certs for Central.
