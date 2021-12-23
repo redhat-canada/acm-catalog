@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: Restrict registries policy
+    openshift.io/display-name: Restrict registries policy
+  name: policy-restrict-registries
