@@ -12,6 +12,6 @@ spec:
   giteaAdminPassword: "password"
   giteaAdminEmail: "admin@example.com"
   giteaCreateUsers: true
-  giteaGenerateUserFormat: "user"
+  giteaGenerateUserFormat: "user%d"
   giteaUserNumber: 10
   giteaUserPassword: "openshift"
