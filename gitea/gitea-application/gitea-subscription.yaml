@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/part-of: gitea
     apps.open-cluster-management.io/reconcile-rate: high
   name: gitea-subscription
-  namespace: acmapp-gitea
+  namespace: gitea
 spec:
   channel: acmapp-gitea/github-gitea-channel
   placement:

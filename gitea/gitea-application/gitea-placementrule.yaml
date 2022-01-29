@@ -4,7 +4,7 @@ metadata:
   labels:
     app: gitea
   name: gitea-placement
-  namespace: acmapp-gitea
+  namespace: gitea
 spec:
   clusterSelector:
     matchLabels:
