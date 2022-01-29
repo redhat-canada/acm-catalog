@@ -8,10 +8,10 @@ spec:
   giteaVolumeSize: 4Gi
   giteaSsl: true
   postgresqlVolumeSize: 4Gi
-  giteaAdminUser: admin
-  giteaAdminPassword: password
-  giteaAdminEmail: admin@example.com
+  giteaAdminUser: gitea-admin
+  giteaAdminPassword: "password"
+  giteaAdminEmail: "admin@example.com"
   giteaCreateUsers: true
-  giteaGenerateUserFormat: "user%d"
+  giteaGenerateUserFormat: "user"
   giteaUserNumber: 10
-  giteaUserPassword: openshift
+  giteaUserPassword: "openshift"
