@@ -1,0 +1,11 @@
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  labels:
+    app: gitea
+  name: gitea-placement
+  namespace: acmapp-gitea
+spec:
+  clusterSelector:
+    matchLabels:
+      demo: gitops
