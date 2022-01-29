@@ -2,6 +2,7 @@ apiVersion: gpte.opentlc.com/v1
 kind: Gitea
 metadata:
   name: gitea
+  namespace: gitea
 spec:
   giteaImageTag: 1.15.10
   giteaVolumeSize: 4Gi
