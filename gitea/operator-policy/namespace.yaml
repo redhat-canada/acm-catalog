@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: Gitea Operator Policy
+    openshift.io/display-name: Gitea Operator Policy
+  name: policy-gitea-operator

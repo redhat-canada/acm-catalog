@@ -1,0 +1,89 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-gitea-operator
+  namespace: policy-gitea-operator
+  annotations:
+    policy.open-cluster-management.io/standards: DevOps
+    policy.open-cluster-management.io/categories: Source Control
+    policy.open-cluster-management.io/controls: Git Repository
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: gitea-namespace
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: v1                    
+              kind: Namespace
+              metadata:
+                name: gitea
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: gitea-operator
+      spec:
+        remediationAction: inform
+        severity: high
+        object-templates:
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: operators.coreos.com/v1alpha1
+              kind: CatalogSource
+              metadata:
+                name: redhat-gpte-gitea
+                namespace: openshift-marketplace
+              spec:
+                sourceType: grpc
+                image: quay.io/gpte-devops-automation/gitea-catalog:latest
+                displayName: Red Hat GPTE (Gitea)
+                publisher: Red Hat GPTE
+          - complianceType: musthave
+            objectDefinition:
+              apiVersion: operators.coreos.com/v1alpha1
+              kind: Subscription
+              metadata:
+                name: gitea-operator
+                namespace: openshift-operators
+              spec:
+                channel: stable
+                installPlanApproval: Automatic
+                name: gitea-operator
+                source: redhat-gpte-gitea
+                sourceNamespace: openshift-marketplace
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-gitea-operator
+  namespace: policy-gitea-operator
+placementRef:
+  name: placement-policy-gitea-operator
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-gitea-operator
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-gitea-operator
+  namespace: policy-gitea-operator
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - {key: demo, operator: In, values: ["gitops"]}
