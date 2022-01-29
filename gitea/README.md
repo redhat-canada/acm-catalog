@@ -2,6 +2,8 @@
 
 This is composed of a `Policy` (create the Gitea operator `CatalogSource` and `Subsription`), and an `Application` (create the Gitea `Namespace` and `Gitea` instance).
 
+This uses the [Gitea Operator](https://github.com/redhat-gpte-devopsautomation/gitea-operator) - great for demos!
+
 To add the policy and application to your ACM instance in one shot:
 
 ```
