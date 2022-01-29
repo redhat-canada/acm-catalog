@@ -8,7 +8,7 @@ To add the policy and application to your ACM instance in one shot:
 oc apply -k https://github.com/redhat-canada/acm-catalog/gitea
 ```
 
-To deploy the operator end demo instance, add the following label to a cluster:
+To deploy the operator and demo instance, add the following label to a cluster:
 
 ```
 demo=gitops
