@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: Gitea - Git with a cup of tea
+    openshift.io/display-name: Gitea
+  name: gitea
