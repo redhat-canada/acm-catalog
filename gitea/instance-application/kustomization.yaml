@@ -6,3 +6,4 @@ resources:
   - gitea-channel.yaml
   - gitea-placementrule.yaml
   - gitea-subscription.yaml
+  - gitea-application.yaml
