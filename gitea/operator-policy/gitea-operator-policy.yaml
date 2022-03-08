@@ -86,4 +86,5 @@ spec:
     type: ManagedClusterConditionAvailable
   clusterSelector:
     matchExpressions:
-      - {key: demo, operator: In, values: ["gitops", "scm", "devops"]}
+      - {key: demo, operator: In, values: ["gitops", "devops"]}
+      - {key: tools, operator: In, values: ["scm"]}
