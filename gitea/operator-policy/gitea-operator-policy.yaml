@@ -2,7 +2,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
   name: policy-gitea-operator
-  namespace: policy-gitea-operator
+  namespace: custom-policies
   annotations:
     policy.open-cluster-management.io/standards: DevOps
     policy.open-cluster-management.io/categories: Source Control
@@ -65,7 +65,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   name: binding-policy-gitea-operator
-  namespace: policy-gitea-operator
+  namespace: custom-policies
 placementRef:
   name: placement-policy-gitea-operator
   kind: PlacementRule
@@ -79,7 +79,7 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   name: placement-policy-gitea-operator
-  namespace: policy-gitea-operator
+  namespace: custom-policies
 spec:
   clusterConditions:
   - status: "True"
