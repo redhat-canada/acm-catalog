@@ -25,7 +25,7 @@ spec:
               apiVersion: v1                    
               kind: Namespace
               metadata:
-                name: gitea
+                name: scm
   - objectDefinition:
       apiVersion: policy.open-cluster-management.io/v1
       kind: ConfigurationPolicy
