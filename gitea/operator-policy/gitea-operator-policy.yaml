@@ -44,7 +44,7 @@ spec:
                 namespace: openshift-marketplace
               spec:
                 sourceType: grpc
-                image: quay.io/gpte-devops-automation/gitea-catalog:latest
+                image: quay.io/gpte-devops-automation/gitea-catalog:1.15.10
                 displayName: Red Hat GPTE (Gitea)
                 publisher: Red Hat GPTE
           - complianceType: musthave
@@ -86,4 +86,4 @@ spec:
     type: ManagedClusterConditionAvailable
   clusterSelector:
     matchExpressions:
-      - {key: demo, operator: In, values: ["gitops"]}
+      - {key: demo, operator: In, values: ["gitops", "scm", "devops"]}
